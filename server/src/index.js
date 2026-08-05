@@ -8,7 +8,25 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 8000
 
-app.use(cors({ origin: 'http://localhost:8443', credentials: true }))
+const allowedOrigins = [
+  'http://localhost:8443',
+  process.env.CLIENT_URL,
+].filter(Boolean)
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true)
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true)
+      }
+
+      callback(new Error('Not allowed by CORS'))
+    },
+    credentials: true,
+  }),
+)
 app.use(express.json())
 
 // GET /api/skills — all catalog skills, with their relationships flattened into
